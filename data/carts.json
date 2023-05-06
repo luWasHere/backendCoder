@@ -1,0 +1,15 @@
+[
+  {
+    "cid": "24a8aa60-5e90-4a5f-bf3a-efd8a2bc754a",
+    "products": [
+      {
+        "pid": "776046d4-af16-49eb-b46b-07a59a48f894",
+        "quantity": 5
+      },
+      {
+        "pid": "ab7c67c3-3146-42eb-a4e1-8143c4f34d99",
+        "quantity": 2
+      }
+    ]
+  }
+]
