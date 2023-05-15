@@ -1,24 +1,24 @@
 [
-  {
-    "title": "bike",
-    "description": "a bike for riding a bike haha",
-    "code": "bike",
-    "price": 200,
-    "status": true,
-    "stock": 43,
-    "category": "bikes",
-    "thumbnails": [],
-    "id": "776046d4-af16-49eb-b46b-07a59a48f894"
-  },
-  {
-    "title": "another bike",
-    "description": "a bike for riding a bike haha",
-    "code": "bike",
-    "price": 200,
-    "status": true,
-    "stock": 43,
-    "category": "bikes",
-    "thumbnails": [],
-    "id": "ab7c67c3-3146-42eb-a4e1-8143c4f34d99"
-  }
+	{
+		"title": "bike",
+		"description": "a bike for riding a bike haha",
+		"code": "bike",
+		"price": 200,
+		"status": true,
+		"stock": 43,
+		"category": "bikes",
+		"thumbnails": [],
+		"id": "776046d4-af16-49eb-b46b-07a59a48f894"
+	},
+	{
+		"title": "another bike",
+		"description": "a bike for riding a bike haha",
+		"code": "bike",
+		"price": 200,
+		"status": true,
+		"stock": 43,
+		"category": "bikes",
+		"thumbnails": [],
+		"id": "ab7c67c3-3146-42eb-a4e1-8143c4f34d99"
+	}
 ]
