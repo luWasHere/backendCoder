@@ -1,126 +1,85 @@
-const fs = require("fs");
 const express = require("express");
 const { Router } = express;
-const uuid4 = require("uuid4");
-
 const router = new Router();
-const path = "./data/products.json";
-const getProducts = () => {
-	return JSON.parse(fs.readFileSync(path).toString());
-};
+const DBManager = require("../daos/mongo/dbManager");
+const productModel = require("../daos/mongo/models/product");
+const pDBManager = new DBManager(productModel);
+
+
 
 router.get("/", (req, res) => {
-	const limit = parseInt(req.query.limit);
-	let products = getProducts();
+	let limit = req.query.limit;
 
-	let sendProducts;
-	!limit
-		? (sendProducts = { data: products })
-		: (sendProducts = { data: products.slice(0, limit) });
-
-	res.send(sendProducts);
+	pDBManager
+		.get(limit)
+		.then((pr) =>
+			res.send({
+				msg: "All products",
+				data: pr,
+			})
+		)
+		.catch((err) => res.send(err));
 });
 
 router.get("/:pid", (req, res) => {
-	const pid = req.params.pid;
-	let products = getProducts();
-	let product = products.find((p) => p.id == pid);
+	let id = req.params.pid;
 
-	let sendProduct;
-	product
-		? (sendProduct = { data: product })
-		: (sendProduct = "Product not found");
-
-	res.send(sendProduct);
+	pDBManager
+		.getById(id)
+		.then((pr) =>
+			res.send({
+				msg: "Product by ID",
+				data: pr,
+			})
+		)
+		.catch((err) => res.send(err));
 });
 
-router.post("/", async (req, res) => {
-	let id = uuid4();
-	let reqProduct = req.body;
-	let product = {
-		title: "",
-		description: "",
-		code: "",
-		price: 0,
-		status: true,
-		stock: 0,
-		category: "",
-		thumbnails: [],
-		id,
-	};
-
-	let productKeys = Object.keys(product);
-	let missingKeys = [];
-
-	productKeys.forEach((key) => {
-		if (key === "thumbnails" || key === "id") return;
-
-		!reqProduct[key] && missingKeys.push(key);
-	});
-
-	if (missingKeys.length == 0) {
-		product = { ...product, ...reqProduct };
-
-		let products = getProducts();
-		let newProducts = products;
-		newProducts.push(product);
-
-		await fs.promises.writeFile(
-			path,
-			JSON.stringify(newProducts, null, 2),
-			(err) => {
-				err && console.log(err);
-			}
-		);
-		return res.send("Product saved!");
-	} else {
-		return res.send("Error: missing " + missingKeys.toString());
-	}
+router.post("/", (req, res) => {
+	let newPr = req.body;
+	pDBManager
+		.add(newPr)
+		.then((pr) => {
+			res.status(200).send({
+				msg: "Product added!",
+				data: pr,
+			});
+		})
+		.catch((err) => {
+			res.status(500).send({
+				msg: "Error",
+				data: err.message,
+			});
+		});
 });
 
-router.put("/:pid", async (req, res) => {
-	let pid = req.params.pid;
-	let newProductData = req.body;
-	let products = getProducts();
+router.put("/:pid", (req, res) => {
+	let id = req.params.pid;
+	let updated = req.body;
 
-	if (!products.find((p) => p.id == pid)) {
-		return res.send("Product not found");
-	}
-
-	let newProducts = products.map((p) => {
-		if (p.id === pid) {
-			return { ...p, ...newProductData };
-		}
-	});
-
-	await fs.promises.writeFile(
-		path,
-		JSON.stringify(newProducts, null, 2),
-		(err) => {
-			err && console.log(err);
-		}
-	);
-	res.send("Product updated!");
+	pDBManager
+		.update(id, updated)
+		.then((pr) =>
+			res.send({
+				msg: "Product updated",
+				data: pr,
+			})
+		)
+		.catch((err) => res.send(err.message));
 });
 
-router.delete("/:pid", async (req, res) => {
-	let products = getProducts();
-	let pid = req.params.pid;
-	let product = products.find((p) => p.id == pid);
+router.delete("/:pid", (req, res) => {
+	let id = req.params.pid;
 
-	if (!product) {
-		return res.send("Product not found");
-	} else {
-		let newProducts = products.filter((p) => p.id !== pid);
-		await fs.promises.writeFile(
-			path,
-			JSON.stringify(newProducts, null, 2),
-			(err) => {
-				err && console.log(err);
-			}
-		);
-		return res.send("Product deleted!");
-	}
+	pDBManager
+		.delete(id)
+		.then((pr) =>
+			res.send({
+				msg: "Product deleted!",
+				data: pr,
+			})
+		)
+		.catch((err) => res.send(err.message));
 });
 
 module.exports = router;

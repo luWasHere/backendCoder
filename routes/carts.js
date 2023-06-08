@@ -1,64 +1,100 @@
-const fs = require("fs");
 const express = require("express");
 const { Router } = express;
-const uuid4 = require("uuid4");
+const DBManager = require("../daos/mongo/dbManager");
+const cartModel = require("../daos/mongo/models/cart");
+const cDBManager = new DBManager(cartModel);
+const productModel = require("../daos/mongo/models/product");
+const pDBManager = new DBManager(productModel);
 
 const router = new Router();
-const path = "./data/carts.json";
-const getCarts = () => {
-	return JSON.parse(fs.readFileSync(path).toString());
-};
-const getProducts = () => {
-	return JSON.parse(fs.readFileSync("./data/products.json").toString());
-};
 
 router.get("/", (req, res) => {
-	let carts = getCarts();
-	res.send({ data: carts });
+	let limit = req.query.limit;
+
+	cDBManager
+		.get(limit)
+		.then((c) =>
+			res.send({
+				msg: "All carts",
+				data: c,
+			})
+		)
+		.catch((err) => res.send(err));
 });
 
-router.post("/", async (req, res) => {
-	let id = uuid4();
-	let carts = getCarts();
-	carts.push({ cid: id, products: [] });
+router.get("/:cid", (req, res) => {
+	let id = req.params.cid;
 
-	await fs.promises.writeFile(path, JSON.stringify(carts, null, 2), (err) => {
-		err && console.log(err);
-	});
-	res.send("A new cart has been created with id " + id);
+	cDBManager
+		.getById(id)
+		.then((c) =>
+			res.send({
+				msg: "Cart by ID",
+				data: c,
+			})
+		)
+		.catch((err) => res.send(err));
+});
+
+router.post("/", (req, res) => {
+	let newC = req.body;
+	cDBManager
+		.add(newC)
+		.then((c) => {
+			res.status(200).send({
+				msg: "Cart added!",
+				data: c,
+			});
+		})
+		.catch((err) => {
+			res.status(500).send({
+				msg: "Error",
+				data: err.message,
+			});
+		});
 });
 
 router.post("/:cid/product/:pid", async (req, res) => {
 	let cid = req.params.cid;
 	let pid = req.params.pid;
+	let cart = null;
+	let product = null;
 
-	let carts = getCarts();
-	let cart = carts.find((c) => c.cid == cid);
+	await cDBManager
+		.getById(cid)
+		.then((c) => {
+			cart = c;
+		})
+		.catch((err) => res.send(err.message));
+	await pDBManager
+		.getById(pid)
+		.then((pr) => {
+			product = pr;
+		})
+		.catch((err) => res.send(err.message));
 
-	let products = getProducts();
-	let product = products.find((p) => p.id == pid)
+	console.log(cart);
+	console.log(product);
 
-	if (!product) {
-		return res.send("Error: There is no product with that ID")
-	}
+	let updated = {
+		...cart,
+		products: cart.products.push({ title: product.title, id: product["_id"] }),
+	};
 
-	if (cart) {
-		cartProduct = cart["products"].find((p) => p.pid == pid);
-
-		if (cartProduct) {
-			cartProduct.quantity += 1;
-		} else {
-			cart["products"].push({ pid, quantity: 1 });
-		}
-
-		await fs.promises.writeFile(path, JSON.stringify(carts, null, 2), (err) => {
-			err && console.log(err);
+	cDBManager
+		.update(cid, updated)
+		.then((c) => {
+			res.status(200).send({
+				msg: "Product added to cart!",
+				data: c,
+			});
+		})
+		.catch((err) => {
+			res.status(500).send({
+				msg: "Error",
+				data: err.message,
+			});
 		});
-
-		return res.send("Product added to cart!");
-	} else {
-		return res.send("Error: Cart not found");
-	}
 });
 
 module.exports = router;

@@ -5,13 +5,15 @@ const http = require("http");
 const server = http.createServer(app);
 const handlebars = require("express-handlebars");
 
+const db = require("./daos/mongo/db");
+
 app.use(express.json());
 app.use(express.static(__dirname + "/public"));
 
 // socket
-const { Server } = require("socket.io");
-const io = new Server(server);
-module.exports = io;
+// const { Server } = require("socket.io");
+// const io = new Server(server);
+// module.exports = io;
 
 // views
 app.engine("handlebars", handlebars.engine());
@@ -30,13 +32,14 @@ app.use("/home", routeHome);
 app.use("/realtimeproducts", routeRealTimeProducts);
 
 // socket on
-io.on("connection", (socket) => {
-	console.log("user on");
-	let products = JSON.parse(fs.readFileSync("data/products.json").toString());
+// io.on("connection", (socket) => {
+// 	console.log("user on");
+// 	let products = JSON.parse(fs.readFileSync("data/products.json").toString());
 
-	socket.emit("products", products);
-});
+// 	socket.emit("products", products);
+// });
 
-server.listen("8080", () => {
+app.listen("8080", () => {
 	console.log("Server running");
+	db.connect();
 });
