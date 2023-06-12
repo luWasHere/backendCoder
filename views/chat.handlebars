@@ -1,0 +1,22 @@
+<div>
+	<div>
+		<h1>Chat app</h1>
+		<div id="chatContainer"></div>
+	</div>
+	<div>
+		<form onsubmit="return addMsg()">
+			<input type="text" id="username" placeholder="username" />
+			<div>
+				<textarea
+					id="text"
+					cols="30"
+					rows="10"
+					placeholder="message"
+				></textarea>
+			</div>
+			<input type="submit" value="send" />
+		</form>
+	</div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/chat.js"></script>
