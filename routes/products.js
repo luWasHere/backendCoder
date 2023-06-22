@@ -5,17 +5,35 @@ const DBManager = require("../daos/mongo/dbManager");
 const productModel = require("../daos/mongo/models/product");
 const pDBManager = new DBManager(productModel);
 
-
-
 router.get("/", (req, res) => {
-	let limit = req.query.limit;
+	const query = req.query;
+	const url = req.url.substring(1);
+	const params = new URLSearchParams(`${url}`);
+
+	const hasPage = (position, obj) => {
+		if (position === "prev") {
+			if (obj.hasPrevPage === true) {
+				params.set("page", obj.prevPage);
+				return `http://localhost:8080/api/products?${params.toString()}`;
+			} else return "no previous page";
+		} else {
+			if (obj.hasNextPage === true) {
+				params.set("page", obj.nextPage);
+				return `http://localhost:8080/api/products?${params.toString()}`;
+			} else return "no next page";
+		}
+	};
 
 	pDBManager
-		.get(limit)
+		.get(query.limit, query.page, query.sort, query.query)
 		.then((pr) =>
 			res.send({
-				msg: "All products",
-				data: pr,
+				msg: "Products",
+				data: {
+					...pr,
+					prevLink: `${hasPage("prev", pr)}`,
+					nextLink: `${hasPage("next", pr)}`,
+				},
 			})
 		)
 		.catch((err) => res.send(err));

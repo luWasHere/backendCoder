@@ -3,15 +3,15 @@ class DBManager {
 		this.objectModel = objectModel;
 	}
 
-	get(limit) {
-		let query = this.objectModel.find();
+	get(limit = 10, page = 1, sort = null, query = null) {
+		sort && (sort = [["price", `${sort}`]]);
 
-		if (limit) {
-			query = query.limit(limit);
-		}
+		let petition = this.objectModel.paginate(
+			{ ...query },
+			{ limit, page, sort, query }
+		);
 
-		return query
-			.exec()
+		return petition
 			.then((objects) => {
 				return objects;
 			})
@@ -20,9 +20,10 @@ class DBManager {
 			});
 	}
 
-	getById(id) {
+	getById(id, populate) {
 		return this.objectModel
 			.findById(id)
+			.populate(populate)
 			.exec()
 			.then((object) => {
 				if (!object) {

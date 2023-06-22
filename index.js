@@ -24,14 +24,14 @@ app.set("views", __dirname + "/views");
 const routeCarts = require("./routes/carts");
 const routeProducts = require("./routes/products");
 const routeHome = require("./routes/home");
-const routeRealTimeProducts = require("./routes/realTimeProducts");
 const routeChat = require("./routes/chat");
+const routeViewProducts = require("./routes/viewProducts");
 
 app.use("/api/carts", routeCarts);
 app.use("/api/products", routeProducts);
 app.use("/home", routeHome);
-app.use("/realtimeproducts", routeRealTimeProducts);
 app.use("/chat", routeChat);
+app.use("/products", routeViewProducts);
 
 let messages = [];
 // socket on
