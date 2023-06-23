@@ -3,6 +3,7 @@ const prevPage = document.getElementById("prevPage");
 const actualPage = document.getElementById("actualPage");
 const productsContainer = document.getElementById("productsContainer");
 const cidContainer = document.getElementById("cartId");
+const cartBtn = document.getElementById("cartBtn");
 let cid = null;
 
 const addToCart = async (pid) => {
@@ -40,6 +41,8 @@ const addToCart = async (pid) => {
 			})
 			.catch((err) => console.log(err));
 	}
+	cartBtn.setAttribute("href", `http://localhost:8080/cart/${cid}`);
+	cartBtn.setAttribute("style", `display: flex`);
 };
 
 (async () => {
